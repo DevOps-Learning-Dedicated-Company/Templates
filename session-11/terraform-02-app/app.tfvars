@@ -1,0 +1,7 @@
+rg = "testingARM"
+location = "ukwest"
+serviceName = "tfserviceplan"
+appName = "tflinuxapp"
+pricingTier = "S1"
+nodes = "1"
+image = "mcr.microsoft.com/dotnet/samples:aspnetapp"
