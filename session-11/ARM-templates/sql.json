@@ -1,0 +1,87 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serverName": {
+            "type": "string"
+        },
+        "region": {
+            "type": "string"
+        },
+        "dbName": {
+            "type": "string"
+        },
+        "dbPricing": {
+            "type": "string"
+        },
+        "dbBackupPolicy": {
+            "type": "string",
+            "allowedValues": [
+                "Geo",
+                "GeoZone",
+                "Local",
+                "Zone"
+            ]
+        },
+        "firewallRules": {
+            "type": "array"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('serverName')]",
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2021-11-01-preview",
+            "location": "[parameters('region')]",
+            "tags": {
+                "displayName": "[parameters('serverName')]"
+            },
+            "properties": {
+                "administratorLogin": "adminUsername",
+                "administratorLoginPassword": "Thisismysqlpassword1"
+            },
+            
+            "resources": [
+                {
+                    "type": "firewallRules",
+                    "apiVersion": "2021-11-01-preview",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
+                    ],
+                    "location": "[parameters('region')]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "startIpAddress": "[first(parameters('firewallRules'))]",
+                        "endIpAddress": "[last(parameters('firewallRules'))]"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[concat(parameters('serverName'), '/', parameters('dbName'))]",
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2021-11-01-preview",
+            "location": "[parameters('region')]",
+            "tags": {
+                "displayName": "[parameters('dbName')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('serverName'))]"
+            ],
+            "sku": {
+                "name": "[parameters('dbPricing')]",
+                "tier": "[parameters('dbPricing')]"
+            },
+            "properties": {
+                "requestedBackupStorageRedundancy": "[parameters('dbBackupPolicy')]",
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "edition": "Basic",
+                "maxSizeBytes": 1073741824,
+                "requestedServiceObjectiveName": "Basic"
+            } 
+        }
+    ],
+    "outputs": {}
+}

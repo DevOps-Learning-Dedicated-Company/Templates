@@ -1,0 +1,142 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serviceName": {
+            "type": "string"
+        },
+        "appName": {
+            "type": "string"
+        },
+        "storageName": {
+            "type": "string"
+        },
+        "region": {
+            "type": "string"
+        },
+        "scheduleInterval": {
+            "type": "string"
+        },
+        "scheduleUnit": {
+            "type": "string"
+        },
+        "retention": {
+            "type": "string"
+        },
+        "startTime": {
+            "type": "string",
+            "defaultValue": "[dateTimeAdd(utcNow(), 'PT5M')]"
+        },
+        "pricingTier": {
+            "type": "string"
+        },
+        "skuName": {
+            "type": "string"
+        },
+        "skuTier": {
+            "type": "string"
+        },
+        "accountSasProperties": {
+            "type": "object",
+            "defaultValue": {
+                "signedServices": "b",
+                "signedPermission": "rw",
+                "signedExpiry": "[dateTimeAdd(utcNow(), 'P1Y')]",
+                "signedResourceTypes": "c"
+            }
+        }
+        // "sastoken": {
+        //     "type": "string"
+        //     "defaultValue": "[listAccountSas(parameters('storageName'), '2018-07-01', parameters('accountSasProperties')).accountSasToken]"
+        // }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('storageName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "tags": {
+                "displayName": "[parameters('storageName')]"
+            },
+            "location": "[parameters('region')]",
+            "kind": "StorageV2",
+            "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]"
+            }
+        },
+        {
+            "name": "[concat(parameters('storageName'), '/default/backupcontainer')]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2021-04-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "name": "[parameters('serviceName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-12-01",
+            "location": "[parameters('region')]",
+            "kind": "linux",
+            "sku": {
+                "name": "[parameters('pricingTier')]"
+            },
+            "properties": {
+                "name": "[parameters('serviceName')]",
+                "reserved": true
+            }
+        },
+        {
+            "name": "[parameters('appName')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-12-01",
+            "location": "[parameters('region')]",
+            "kind": "app,linux,container",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serviceName'))]"
+            ],
+            "properties": {
+                "name": "[parameters('appName')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serviceName'))]"
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Web/sites/config",
+                    "apiVersion": "2021-03-01",
+                    "name": "[concat(parameters('appName'), '/backupconfig')]",
+                    "kind": "app,linux,container",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+                    ],
+                    "properties": {
+                        "backupName": "backup1234",
+                        "backupSchedule": {
+                            "frequencyInterval": "[parameters('scheduleInterval')]",
+                            "frequencyUnit": "[parameters('scheduleUnit')]",
+                            "keepAtLeastOneBackup": "true",
+                            "retentionPeriodInDays": "[parameters('retention')]",
+                            "startTime": "[parameters('startTime')]"
+                        },
+                        // "databases": [
+                        // {
+                        //     "connectionString": "string",
+                        //     "connectionStringName": "string",
+                        //     "databaseType": "string",
+                        //     "name": "string"
+                        // }
+                        // ],
+                        "enabled": "true",
+                        "storageAccountUrl": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/backupcontainer?', listAccountSas(parameters('storageName'), '2022-05-01', parameters('accountSasProperties')).accountSasToken)]"
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}
