@@ -1,0 +1,109 @@
+{
+  "version": 4,
+  "terraform_version": "1.2.8",
+  "serial": 23,
+  "lineage": "1e542ec0-4b6b-1b5a-c8b4-e4c0211e60db",
+  "outputs": {},
+  "resources": [
+    {
+      "mode": "data",
+      "type": "azurerm_resource_group",
+      "name": "testingARM",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/26b3c258-f71f-4c14-b08e-32bff9b16b5a/resourceGroups/testingARM",
+            "location": "ukwest",
+            "name": "testingARM",
+            "tags": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_network_security_group",
+      "name": "nsg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/26b3c258-f71f-4c14-b08e-32bff9b16b5a/resourceGroups/testingARM/providers/Microsoft.Network/networkSecurityGroups/tf-nsg",
+            "location": "ukwest",
+            "name": "tf-nsg",
+            "resource_group_name": "testingARM",
+            "security_rule": [
+              {
+                "access": "Allow",
+                "description": "",
+                "destination_address_prefix": "*",
+                "destination_address_prefixes": [],
+                "destination_application_security_group_ids": [],
+                "destination_port_range": "*",
+                "destination_port_ranges": [],
+                "direction": "Outbound",
+                "name": "test123",
+                "priority": 100,
+                "protocol": "Tcp",
+                "source_address_prefix": "*",
+                "source_address_prefixes": [],
+                "source_application_security_group_ids": [],
+                "source_port_range": "*",
+                "source_port_ranges": []
+              }
+            ],
+            "tags": {},
+            "timeouts": {
+              "create": null,
+              "delete": null,
+              "read": null,
+              "update": null
+            }
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxODAwMDAwMDAwMDAwLCJkZWxldGUiOjE4MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjoxODAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIwIn0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_subnet",
+      "name": "subnet",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "address_prefixes": [
+              "10.0.1.0/24"
+            ],
+            "delegation": [],
+            "enforce_private_link_endpoint_network_policies": false,
+            "enforce_private_link_service_network_policies": false,
+            "id": "/subscriptions/26b3c258-f71f-4c14-b08e-32bff9b16b5a/resourceGroups/testingARM/providers/Microsoft.Network/virtualNetworks/tf-vnet/subnets/tf-subnet1",
+            "name": "tf-subnet1",
+            "private_endpoint_network_policies_enabled": true,
+            "private_link_service_network_policies_enabled": true,
+            "resource_group_name": "testingARM",
+            "service_endpoint_policy_ids": [],
+            "service_endpoints": [],
+            "timeouts": {
+              "create": null,
+              "delete": null,
+              "read": null,
+              "update": null
+            },
+            "virtual_network_name": "tf-vnet"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxODAwMDAwMDAwMDAwLCJkZWxldGUiOjE4MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjoxODAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIwIn0="
+        }
+      ]
+    }
+  ]
+}
