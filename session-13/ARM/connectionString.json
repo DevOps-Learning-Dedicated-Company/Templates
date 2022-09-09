@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "type": "string",
+            "metadata": {
+                "description": "web app name for which the connection is going to be set"
+            }
+        },
+        "dbName": {
+            "type": "string",
+            "metadata": {
+                "description": "name of database to connect to"
+            }
+        },
+        "serverName": {
+            "type": "string",
+            "metadata": {
+                "description": "database server name"
+            }
+        },
+        "pass": {
+            "type": "string",
+            "metadata": {
+                "description": "db password"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-01-01",
+            "name": "[parameters('appName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "app",
+            "properties": {
+                "httpsOnly": true,
+                "siteConfig": {
+                    "vnetRouteAllEnabled": true,
+                    "http20Enabled": true,
+                    "connectionStrings": [
+                        {
+                        "name": "sqlConString",
+                        "connectionString": "[concat('Server=tcp:', parameters('serverName'),'.database.windows.net,1433;Initial Catalog=', parameters('dbName'), ';Persist Security Info=False;User ID=adminUsername;Password=', parameters('pass'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sName": {
+            "type": "string"            
+        },
+        "vName": {
+            "type": "string"
+        },
+        "appName": {
+            "type": "string"
+        },
+        "addressPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "address prefix for a subnet"
+            }
+        }
+    },
+    "variables": {
+      "subnetid": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vName'), parameters('sName'))]",
+      "webapp": "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-11-01",
+            "name": "[concat(parameters('vName'), '/', parameters('sName'))]",
+            "properties": {
+                    "addressPrefix": "[parameters('addressPrefix')]"
+                }
+        },        
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2020-11-01",
+            "name": "armPrivateEndpoint",
+            "location": "[resourceGroup().location]",
+            "properties": {
+            "subnet": {
+                "id": "[variables('subnetid')]"
+            },
+            "privateLinkServiceConnections": [
+                {
+                "name": "armPrivateEndpoint",
+                "properties": {
+                    "privateLinkServiceId": "[variables('webapp')]",
+                    "groupIds": [
+                    "sites"
+                    ]
+                }
+                }
+            ]
+            }
+        }
+    ]
+  }
