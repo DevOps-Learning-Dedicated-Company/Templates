@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "vmImageReference": {
+            "type": "array",
+            "defaultValue": ["Canonical", "UbuntuServer", "18.04-LTS", "latest"]
+        },
+        "vmPricingTier": {
+            "type": "string"
+        },
+        "diskPricingTier": {
+            "type": "string"
+        },
+        "vnet": {
+            "type": "string",
+            "metadata": {
+                "description": "vnet name"
+            }
+        },
+        "subnet": {
+            "type": "string",
+            "metadata": {
+                "description": "subnet name"
+            }
+        },
+        "username": {
+            "type": "string",
+            "metadata": {
+                "description": "admin username"
+            }
+        },
+        "pass": {
+            "type": "string",
+            "metadata": {
+                "description": "admin password"
+            }
+        }
+    },
+    "resources": [
+        {
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-11-01",
+        "name": "[parameters('vmName')]",
+        "location": "[resourceGroup().location]",
+            "identity": {
+                "type": "None"
+        },
+        "properties": {
+            "additionalCapabilities": {
+                "ultraSSDEnabled": false
+            },
+            "hardwareProfile": {
+                "vmSize": "[parameters('vmPricingTier')]"
+            },
+            "osProfile": {
+                "computerName": "[parameters('vmName')]",
+                "adminPassword": "[parameters('pass')]",
+                "adminUsername": "[parameters('username')]",
+                "allowExtensionOperations": true
+            },
+            "storageProfile": {
+                "imageReference": {
+                    "publisher": "[parameters('vmImageReference')[0]]",
+                    "offer": "[parameters('vmImageReference')[1]]",
+                    "sku": "[parameters('vmImageReference')[2]]",
+                    "version": "[parameters('vmImageReference')[3]]"
+                },
+                "osDisk": {
+                    "createOption": "FromImage",
+                    "managedDisk": {
+                        "storageAccountType": "[parameters('diskPricingTier')]"
+                    },
+                    "name": "[concat(parameters('vmName'), 'disk')]"
+                }
+            },
+            "networkProfile": {
+                "networkApiVersion": "2020-11-01",
+                "networkInterfaceConfigurations": [
+                    {
+                    "name": "NIC",
+                    "properties": {
+                        "deleteOption": "Delete",
+                        "ipConfigurations": [
+                        {
+                            "name": "[concat(parameters('vmName'), 'publicIP')]",
+                            "properties": {
+                                "publicIPAddressConfiguration": {
+                                    "name": "[concat(parameters('vmName'), 'publicIP')]",
+                                    "properties": {
+                                        "deleteOption": "Delete",
+                                        "publicIPAddressVersion": "IPv4",
+                                        "publicIPAllocationMethod": "Static"
+                                    }
+                                },
+                                "subnet": {
+                                    "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnet'), parameters('subnet'))]"
+                                }
+                            }
+                        }
+                        ]
+                    }
+                    }
+                ]
+            }
+        }
+        }
+    ],
+    "outputs": {}
+}

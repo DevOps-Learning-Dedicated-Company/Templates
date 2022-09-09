@@ -1,0 +1,84 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "region": {
+            "type": "string"
+        },
+        "nsgName": {
+            "type": "string"
+        },
+        "rules": {
+            "type": "array",
+            "defaultValue": [
+                "AllowAll",
+                "AllowAllOutbound",
+                "Tcp",
+                "*",
+                "*",
+                "*",
+                "*",
+                "Allow",
+                100,
+                "Outbound"
+            ]
+        },
+        "virtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the existing VNet"
+            }
+        },
+        "subnet": {
+            "type": "array",
+            "defaultValue": ["arm-subnet1", "10.0.1.0/24"],
+            "metadata": {
+                "description": "Name and address prefix of a subnet for nsg assignment"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('nsgName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-11-01",
+            "location": "[parameters('region')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "[parameters('rules')[0]]",
+                        "properties": {
+                            "description": "[parameters('rules')[1]]",
+                            "protocol": "[parameters('rules')[2]]",
+                            "sourcePortRange": "[parameters('rules')[3]]",
+                            "destinationPortRange": "[parameters('rules')[4]]",
+                            "sourceAddressPrefix": "[parameters('rules')[5]]",
+                            "destinationAddressPrefix": "[parameters('rules')[6]]",
+                            "access": "[parameters('rules')[7]]",
+                            "priority": "[parameters('rules')[8]]",
+                            "direction": "[parameters('rules')[9]]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+        "apiVersion": "2020-11-01",
+        "type": "Microsoft.Network/virtualNetworks/subnets",
+        "dependsOn": [
+            "[parameters('nsgName')]"
+        ],
+        "name": "[concat(parameters('virtualNetworkName'), '/', parameters('subnet')[0])]",
+        "location": "[parameters('region')]",
+        "properties": {
+            "addressPrefix": "[parameters('subnet')[1]]",
+            "networkSecurityGroup": {
+            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+            }
+        }
+        }
+    ],
+    "outputs": {}
+}
