@@ -1,0 +1,5 @@
+rg = "testingARM"
+location = "ukwest"
+appName = "tflinuxapp"
+sName = "tf-subnet3"
+vName = "tf-vnet"

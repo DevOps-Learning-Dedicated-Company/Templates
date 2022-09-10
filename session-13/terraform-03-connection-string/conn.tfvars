@@ -1,0 +1,7 @@
+rg = "testingARM"
+location = "ukwest"
+appName = "tflinuxapp"
+dbName = "terraformdb420"
+planName = "tfserviceplan"
+serverName = "terraformsqlserver420"
+pass = "Thisismydbpassword1!"

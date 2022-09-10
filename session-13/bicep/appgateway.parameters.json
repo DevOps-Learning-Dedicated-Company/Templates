@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "ukwest"
+        },
+        "gatName": {
+            "value": "appgatforAppService"
+        }, 
+        "endpoints": {
+            "value": [
+                {
+                    "name": "frontendport01",
+                    "Port": 80
+                },
+                {
+                    "name": "frontendport02",
+                    "Port": 81
+                }
+            ]
+        },
+        "wafRules": {
+            "value": ["OWASP", "3.2"]
+        },
+        "wafName": {
+            "value": "appservice-waf"
+        },
+        "vName": {
+            "value": "appforvnetintegrationvnet"
+        },
+        "ipName": {
+            "value": "wafpublicIP"
+        },
+        "subnet": {
+            "value": "app-gat-for-app-service-subnet"
+        },
+        "addressPrefix": {
+            "value": "10.0.3.0/24"
+        }
+    }
+  }
