@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "configName": {
+            "type": "string"
+        },
+        "appName": {
+            "type": "string"
+        },
+        "roleId": {
+            "type": "string",
+            "defaultValue": "516239f1-63e1-4d78-a4de-a74fb236a071",
+            "metadata": {
+                "description": "id of a specific role that's going to be assigned"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2020-10-01-preview",
+            "scope": "[concat('Microsoft.AppConfiguration/configurationStores/', parameters('configName'))]",
+            "name": "[guid(resourceId('Microsoft.AppConfiguration/configurationStores', parameters('configName')), parameters('roleId'))]",
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', parameters('roleId'))]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('appName')), '2022-03-01', 'Full').identity.principalId]"
+            }
+        }
+    ],
+    "outputs": {}
+}
