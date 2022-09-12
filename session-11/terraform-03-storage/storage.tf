@@ -44,7 +44,3 @@ resource "azurerm_storage_container" "container" {
   storage_account_name  = azurerm_storage_account.st.name
   container_access_type = "blob"
 }
-
-output "sastoken" {
-  value = azurerm_storage_account.st.primary_connection_string
-}
