@@ -60,15 +60,3 @@ resource "azurerm_linux_web_app" "app" {
     }
   }
 }
-
-output "id" {
-  value = azurerm_service_plan.plan.id
-}
-
-output "image" {
-  value = azurerm_linux_web_app.app.site_config[0]
-}
-
-output "imagetag" {
-  value = azurerm_linux_web_app.app.site_config[1]
-}
