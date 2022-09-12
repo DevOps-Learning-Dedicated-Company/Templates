@@ -1,0 +1,7 @@
+rg = "testingARM"
+location = "ukwest"
+serviceName = "tfserviceplan"
+storageName = "tfstacc321"
+appName = "tflinuxapp"
+freInt = "1"
+freUnit = "Day"
