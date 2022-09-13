@@ -27,7 +27,7 @@
             "value": "appservice-waf"
         },
         "vName": {
-            "value": "appforvnetintegrationvnet"
+            "value": "linuxbasedappbicep420vnet"
         },
         "ipName": {
             "value": "wafpublicIP"
@@ -37,6 +37,9 @@
         },
         "addressPrefix": {
             "value": "10.0.3.0/24"
+        },
+        "appName": {
+            "value": "linuxbasedappbicep420"
         }
     }
   }
