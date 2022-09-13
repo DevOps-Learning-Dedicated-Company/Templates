@@ -15,6 +15,8 @@ param wafRules array = [
 @description('name of waf')
 param wafName string
 
+param appName string
+
 @description('name of virtual network')
 param vName string
 
@@ -91,6 +93,8 @@ resource gatName_resource 'Microsoft.Network/applicationGateways@2020-11-01' = {
       {
         name: 'appGatewayFrontendIP'
         properties: {
+          privateIPAllocationMethod: 'Dynamic'
+
           publicIPAddress: {
             id: ipName_resource.id
           }
@@ -107,6 +111,11 @@ resource gatName_resource 'Microsoft.Network/applicationGateways@2020-11-01' = {
       {
         name: 'appGatewayBackendPool'
         properties: {
+          backendAddresses: [
+            {
+                fqdn: '${appName}.azurewebsites.net'
+            }
+          ]
         }
       }
     ]
