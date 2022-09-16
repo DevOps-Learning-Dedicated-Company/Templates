@@ -1,3 +1,4 @@
+#!/bin/bash
 az storage blob service-properties update \
    --account-name "armContainerforStaticWeb" \
    --static-website \
