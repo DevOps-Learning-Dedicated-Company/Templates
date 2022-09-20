@@ -17,5 +17,5 @@ New-AzResourceGroupDeployment `
     -sName 'armconforstaticweb' `
     -location 'ukwest' `
     -sku 'Standard_LRS' `
-    -userId '/subscriptions/0caac0d7-05bb-4689-9c72-a9878636f4b6/resourcegroups/testing/providers/Microsoft.ManagedIdentity/userAssignedIdentities/testUserManagedId' `
+    -iName 'armUserId01' `
     -Verbose
