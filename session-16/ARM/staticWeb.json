@@ -19,14 +19,10 @@
         "type": "string",
         "defaultValue": "[utcNow()]"
       },
-      "rawScriptPath": {
-        "type": "string",
-        "defaultValue": "https://raw.githubusercontent.com/DevOps-Learning-Dedicated-Company/Templates/main/session-16/script.sh"
-      },
-      "userId": {
+      "iName": {
         "type": "string",
         "metadata": {
-            "description": "User Assigned Managed identity id"
+          "description": "User Assigned Managed identity name"
         }
       }
     },
@@ -51,6 +47,12 @@
         "kind": "StorageV2"
       },
       {
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "name": "[parameters('iName')]",
+        "apiVersion": "2018-11-30",
+        "location": "[parameters('location')]"
+      },
+      {
         "type": "Microsoft.Resources/deploymentScripts",
         "apiVersion": "2020-10-01",
         "name": "staticWebsiteScript",
@@ -59,21 +61,22 @@
         "identity": {
           "type": "UserAssigned",
           "userAssignedIdentities": {
-             "[parameters('userId')]": {}
+             "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('iName'))]": {}
           }
         },
         "properties": {
           "forceUpdateTag": "[parameters('unique_id')]",
-          "azCliVersion": "2.30.0",
+          "azCliVersion": "2.9.1",
           "arguments": "[variables('staticWebsite').arguments]",
-          "primaryScriptUri": "[parameters('rawScriptPath')]",
+          "scriptContent": "az storage blob service-properties update --account-key wWfTA611nbMUPYLoNFSng++aBpB279bv78qE8+zu20YTDyq+n/MP153kBtdrdW3+rI+3BVx/e/Rg+AStPU18NA== --account-name armconforstaticweb --static-website --404-document 404.html --index-document index.html --verbose -o table",
           "supportingScriptUris": [],
           "timeout": "PT10M",
           "cleanupPreference": "Always",
           "retentionInterval": "P1D"
         },
         "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', parameters('sName'))]"
+          "[resourceId('Microsoft.Storage/storageAccounts', parameters('sName'))]",
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('iName'))]"
         ]
       }
     ],
