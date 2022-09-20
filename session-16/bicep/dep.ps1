@@ -9,3 +9,13 @@ New-AzResourceGroupDeployment `
     -rName 'bicepContainerRegistry01' `
     -location 'ukwest' `
     -Verbose
+    
+New-AzResourceGroupDeployment `
+    -Name 'bicepStaticWebsite' `
+    -ResourceGroupName $RG `
+    -TemplateFile 'staticWeb.bicep' `
+    -sName 'bicepconforstaticweb' `
+    -location 'ukwest' `
+    -sku 'Standard_LRS' `
+    -iName 'bicepUserId01' `
+    -Verbose
