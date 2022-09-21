@@ -1,0 +1,10 @@
+iName = "tfinsight"
+rg = "testing"
+location = "ukwest"
+type = "web"
+requestSource = "CustomDeployment"
+tName = "tfName"
+testKind = "standard"
+httpverb = "GET"
+url = "https://google.com"
+responseCode = 200
