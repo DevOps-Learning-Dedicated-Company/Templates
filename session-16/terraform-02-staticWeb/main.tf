@@ -87,22 +87,3 @@ resource "azapi_resource" "script" {
     }
   })
 }
-
-# resource "azapi_resource" "symbolicname" {
-#   type = "Microsoft.Resources/deploymentScripts@2020-10-01"
-#   name = "string"
-#   location = "string"
-#   parent_id = "string"
-#   tags = {
-#     tagName1 = "tagValue1"
-#     tagName2 = "tagValue2"
-#   }
-#   identity {
-#     type = "UserAssigned"
-#     identity_ids = []
-#   }
-#   // For remaining properties, see deploymentScripts objects
-#   body = jsonencode({
-#     kind = "string"
-#   })
-# }
