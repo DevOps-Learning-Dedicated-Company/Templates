@@ -15,3 +15,12 @@ New-AzResourceGroupDeployment `
     -url 'https://google.com' `
     -responseCode '200' `
     -Verbose
+    
+New-AzResourceGroupDeployment `
+    -Name 'arm-app-service-plan-dashboard' `
+    -ResourceGroupName $RG `
+    -TemplateFile 'appServicePlanDash.json' `
+    -appServiceName 'appservice420' `
+    -appServiceRG 'testing' `
+    -dashboardDisplayName 'testTest' `
+    -Verbose
