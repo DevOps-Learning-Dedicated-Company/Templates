@@ -24,3 +24,23 @@ New-AzResourceGroupDeployment `
     -appServiceRG 'testing' `
     -dashboardDisplayName 'testTest' `
     -Verbose
+
+New-AzResourceGroupDeployment `
+    -Name 'arm-app-service-dashboard' `
+    -ResourceGroupName $RG `
+    -TemplateFile 'appServiceDash.json' `
+    -appServiceName 'linuxbasedapp420' `
+    -appServiceRG 'testing' `
+    -dashboardName 'armAppService' `
+    -dashboardDisplayName 'armAppService' `
+    -Verbose
+
+New-AzResourceGroupDeployment `
+    -Name 'arm-app-gat-dashboard' `
+    -ResourceGroupName $RG `
+    -TemplateFile 'appGatDash.json' `
+    -appGatName 'appgat01' `
+    -appServiceRG 'testing' `
+    -dashboardName 'armAppGat' `
+    -dashboardDisplayName 'armAppGat' `
+    -Verbose
