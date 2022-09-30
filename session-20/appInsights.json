@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "iName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of Application Insights resource."
+        }
+      },
+      "type": {
+        "type": "string",
+        "defaultValue": "web",
+        "metadata": {
+          "description": "Type of app you are deploying. This field is for legacy reasons and will not impact the type of App Insights resource you deploy."
+        }
+      },
+      "location": {
+        "type": "string"
+      },
+      "requestSource": {
+        "type": "string",
+        "metadata": {
+          "description": "Source of Azure Resource Manager deployment"
+        }
+      },
+      "tName": {
+        "type": "string",
+        "metadata": {
+          "description": "Test name"
+        }
+      },
+      "testKind": {
+        "type": "string",
+        "defaultValue": "standard"
+      },
+      "httpverb": {
+        "type": "string",
+        "defaultValue": "GET",
+        "metadata": {
+          "description": "hettp request verb (POST, GET, PUT, PATCH or DELETE)"
+        }
+      },
+      "url": {
+        "type": "string",
+        "metadata": {
+          "description": "URL to test"
+        }
+      },
+      "responseCode": {
+        "type": "string",
+        "metadata": {
+          "description": "Expected response status code"
+        }
+      },
+      "ssl": {
+        "type": "bool",
+        "defaultValue": true,
+        "metadata": {
+          "description": "ssl check"
+        }
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Insights/components",
+        "apiVersion": "2020-02-02",
+        "name": "[parameters('iName')]",
+        "location": "[parameters('location')]",
+        "kind": "[parameters('type')]",
+        "properties": {
+          "Application_Type": "[parameters('type')]",
+          "Flow_Type": "Bluefield",
+          "Request_Source": "[parameters('requestSource')]"
+        }
+      },
+      {
+        "type": "Microsoft.Insights/webtests",
+        "apiVersion": "2018-05-01-preview",
+        "name": "[parameters('tName')]",
+        "location": "[parameters('location')]",
+        "kind": "[parameters('testKind')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Insights/components', parameters('iName'))]"
+        ],
+        "tags": {
+          "[concat('hidden-link:', resourceId('Microsoft.Insights/components', parameters('iName')))]": "Resource"
+        },
+        "properties": {
+          "Enabled": true,
+          "Frequency": 900,
+          "Kind": "[parameters('testKind')]",
+          "Locations": [
+            {
+              "Id": "emea-se-sto-edge"
+            }
+          ],
+          "Name": "[parameters('tName')]",
+          "Request": {
+            "FollowRedirects": true,
+            "HttpVerb": "[parameters('httpverb')]",
+            "RequestUrl": "[parameters('url')]"
+          },
+          "RetryEnabled": true,
+          "SyntheticMonitorId": "[parameters('tName')]",
+          "ValidationRules": {
+            "ExpectedHttpStatusCode": "[parameters('responseCode')]",
+            "SSLCheck": "[parameters('ssl')]"
+          }
+        }
+      }
+    ]
+  }

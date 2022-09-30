@@ -1,0 +1,100 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+      "_generator": {
+        "name": "bicep",
+        "version": "0.6.18.56646",
+        "templateHash": "14278858930741668940"
+      }
+    },
+    "parameters": {
+      "uniqueDnsName": {
+        "type": "string",
+        "defaultValue": "tm2137",
+        "metadata": {
+          "description": "Relative DNS name for the traffic manager profile, must be globally unique."
+        }
+      },
+      "profileStatus": {
+        "type": "string",
+        "defaultValue": "Performance"
+      },
+      "tmName": {
+        "type": "string",
+        "defaultValue": "tm2137",
+        "metadata": {
+            "description": "traffic manager name"
+        }
+      },
+      "s1Name": {
+        "type": "string",
+        "defaultValue": "host-01",
+        "metadata": {
+            "description": "Site 1 name"
+        }
+      },
+      "s2Name": {
+        "type": "string",
+        "defaultValue": "host-02",
+        "metadata": {
+            "description": "site 2 name"
+        }
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Network/trafficmanagerprofiles",
+        "apiVersion": "2018-08-01",
+        "name": "[parameters('tmName')]",
+        "location": "global",
+        "properties": {
+          "profileStatus": "Enabled",
+          "trafficRoutingMethod": "[parameters('profileStatus')]",
+          "dnsConfig": {
+            "relativeName": "[parameters('uniqueDnsName')]",
+            "ttl": 30
+          },
+          "monitorConfig": {
+                    "profileMonitorStatus": "Online",
+                    "protocol": "HTTP",
+                    "port": 80,
+                    "path": "/",
+                    "intervalInSeconds": 30,
+                    "toleratedNumberOfFailures": 3,
+                    "timeoutInSeconds": 10
+          },
+          "endpoints": [
+            {
+                "id": "[concat(resourceId('Microsoft.Network/trafficManagerProfiles', parameters('tmName')), '/azureEndpoints/site01')]",
+                "name": "site01",
+                "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+                "properties": {
+                    "endpointStatus": "Enabled",
+                    "endpointMonitorStatus": "Online",
+                    "targetResourceId": "[resourceId('Microsoft.Web/sites', parameters('s1Name'))]",
+                    "target": "[concat(parameters('s1Name'), '.azurewebsites.net')]",
+                    "weight": 1,
+                    "priority": 2,
+                    "endpointLocation": "UK South"
+                }
+            },
+            {
+                "id": "[concat(resourceId('Microsoft.Network/trafficManagerProfiles', parameters('tmName')), '/azureEndpoints/site02')]",
+                "name": "site02",
+                "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+                "properties": {
+                    "endpointStatus": "Enabled",
+                    "endpointMonitorStatus": "Online",
+                    "targetResourceId": "[resourceId('Microsoft.Web/sites', parameters('s2Name'))]",
+                    "target": "[concat(parameters('s2Name'), '.azurewebsites.net')]",
+                    "weight": 1,
+                    "priority": 1,
+                    "endpointLocation": "UK West"
+                }
+            }
+          ]
+        }
+      }
+    ]
+  }

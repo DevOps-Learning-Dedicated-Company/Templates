@@ -1,0 +1,166 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "fName": {
+            "defaultValue": "arm-site-fd-420",
+            "type": "String"
+        },
+        "s1Name": {
+        "type": "string",
+        "defaultValue": "host-01",
+        "metadata": {
+            "description": "Site 1 name"
+        }
+        },
+        "s2Name": {
+            "type": "string",
+            "defaultValue": "host-02",
+            "metadata": {
+                "description": "site 2 name"
+            }
+        },
+        "s3Name": {
+            "type": "string",
+            "defaultValue": "dr2137",
+            "metadata": {
+                "description": "site 3 name"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Cdn/profiles",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[parameters('fName')]",
+            "location": "Global",
+            "sku": {
+                "name": "Standard_AzureFrontDoor"
+            },
+            "kind": "frontdoor",
+            "properties": {
+                "originResponseTimeoutSeconds": 60,
+                "extendedProperties": {}
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/afdendpoints",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-01')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]"
+            ],
+            "properties": {
+                "enabledState": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-pool1')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]"
+            ],
+            "properties": {
+                "loadBalancingSettings": {
+                    "sampleSize": 4,
+                    "successfulSamplesRequired": 3,
+                    "additionalLatencyInMilliseconds": 100
+                },
+                "healthProbeSettings": {
+                    "probePath": "/",
+                    "probeRequestType": "HEAD",
+                    "probeProtocol": "Http",
+                    "probeIntervalInSeconds": 100
+                },
+                "sessionAffinityState": "Disabled"
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups/origins",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-pool1/dr1')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('fName'), 'site-pool1')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]"
+            ],
+            "properties": {
+                "hostName": "[concat(parameters('s3Name'), '.azurewebsites.net')]",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "[concat(parameters('s3Name'), '.azurewebsites.net')]",
+                "priority": 5,
+                "weight": 1000,
+                "enabledState": "Enabled",
+                "enforceCertificateNameCheck": true
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups/origins",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-pool1/site-01')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('fName'), 'site-pool1')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]"
+            ],
+            "properties": {
+                "hostName": "[concat(parameters('s1Name'), '.azurewebsites.net')]",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "[concat(parameters('s1Name'), '.azurewebsites.net')]",
+                "priority": 1,
+                "weight": 1000,
+                "enabledState": "Enabled",
+                "enforceCertificateNameCheck": true
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/origingroups/origins",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-pool1/site-02')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('fName'), 'site-pool1')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]"
+            ],
+            "properties": {
+                "hostName": "[concat(parameters('s2Name'), '.azurewebsites.net')]",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "[concat(parameters('s2Name'), '.azurewebsites.net')]",
+                "priority": 1,
+                "weight": 1000,
+                "enabledState": "Enabled",
+                "enforceCertificateNameCheck": true
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/profiles/afdendpoints/routes",
+            "apiVersion": "2022-05-01-preview",
+            "name": "[concat(parameters('fName'), '/site-01/route-01')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/profiles/afdendpoints', parameters('fName'), 'site-01')]",
+                "[resourceId('Microsoft.Cdn/profiles', parameters('fName'))]",
+                "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('fName'), 'site-pool1')]"
+            ],
+            "properties": {
+                "customDomains": [],
+                "originGroup": {
+                    "id": "[resourceId('Microsoft.Cdn/profiles/origingroups', parameters('fName'), 'site-pool1')]"
+                },
+                "ruleSets": [],
+                "supportedProtocols": [
+                    "Https"
+                ],
+                "patternsToMatch": [
+                    "/*"
+                ],
+                "forwardingProtocol": "HttpsOnly",
+                "linkToDefaultDomain": "Enabled",
+                "httpsRedirect": "Enabled",
+                "enabledState": "Enabled"
+            }
+        }
+    ]
+}

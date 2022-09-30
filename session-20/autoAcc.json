@@ -1,0 +1,198 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "workspaceName": {
+        "type": "string",
+        "defaultValue": "idkwhatworkspace",
+        "metadata": {
+          "description": "Log Analytics Workspace name"
+        }
+      },
+      "sku": {
+        "type": "string",
+        "defaultValue": "pergb2018",
+        "metadata": {
+          "description": "Set Log Analytics Pricing Tier"
+        }
+      },
+      "dataRetention": {
+        "type": "int",
+        "defaultValue": 30,
+        "minValue": 7,
+        "maxValue": 730,
+        "metadata": {
+          "description": "Log Analytics Data Retention"
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location in which to create the log analytics workspace."
+        }
+      },
+      "uri": {
+        "type": "string",
+        "defaultValue": "https://raw.githubusercontent.com/DevOps-Learning-Dedicated-Company/Templates/main/session-19/script.ps1"
+      },
+      "aName": {
+        "defaultValue": "armAutoAcc01",
+        "type": "String"
+        },
+      "startTime1": {
+        "type": "string",
+        "defaultValue": "2022-09-29T21:30:00+02:00",
+            "metadata": {
+                "description": "schedule 1 start time"
+        }
+      },
+      "startTime2": {
+        "type": "string",
+        "defaultValue": "2022-09-29T22:00:00+02:00",
+        "metadata": {
+            "description": "schedule 2 start time"
+        }
+      },
+      "guids": {
+        "type": "array",
+        "defaultValue": ["[guid(utcNow())]", "[guid(concat(utcNow(), '1'))]"],
+        "metadata": {
+            "description": "guids of jobschedules"
+        }
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.OperationalInsights/workspaces",
+        "apiVersion": "2020-08-01",
+        "name": "[parameters('workspaceName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "sku": {
+            "name": "[parameters('sku')]"
+          },
+          "retentionInDays": "[parameters('dataRetention')]",
+          "features": {
+            "searchVersion": 1,
+            "legacy": 0
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Automation/automationAccounts",
+        "apiVersion": "2020-01-13-preview",
+        "name": "[parameters('aName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[parameters('workspaceName')]"
+        ],
+        "properties": {
+          "sku": {
+            "name": "Basic"
+          }
+        },
+        "resources": [
+            {
+            "type": "runbooks",
+            "apiVersion": "2020-01-13-preview",
+            "name": "OnOff",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[parameters('aName')]"
+            ],
+            "properties": {
+                "runbookType": "PowerShell",
+                "logProgress": false,
+                "logVerbose": false,
+                "description": "on and off runbook",
+                "publishContentLink": {
+                    "uri": "[parameters('uri')]",
+                    "version": "1.0.0.0"
+                }
+            }
+            },
+            {
+                "type": "Microsoft.Automation/automationAccounts/schedules",
+                "apiVersion": "2020-01-13-preview",
+                "name": "[concat(parameters('aName'), '/schedule01')]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Automation/automationAccounts', parameters('aName'))]"
+                ],
+                "properties": {
+                    "description": "half hour on half hour off",
+                    "startTime": "[parameters('startTime1')]",
+                    "expiryTime": "9999-12-31T23:59:59.9999999+00:00",
+                    "interval": 1,
+                    "frequency": "Hour",
+                    "timeZone": "Europe/Warsaw"
+                }
+            },
+            {
+                "type": "Microsoft.Automation/automationAccounts/schedules",
+                "apiVersion": "2020-01-13-preview",
+                "name": "[concat(parameters('aName'), '/schedule02')]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Automation/automationAccounts', parameters('aName'))]"
+                ],
+                "properties": {
+                    "startTime": "[parameters('startTime2')]",
+                    "expiryTime": "9999-12-31T23:59:59.9999999+00:00",
+                    "interval": 1,
+                    "frequency": "Hour",
+                    "timeZone": "Europe/Warsaw"
+                }
+            },
+            {
+                "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+                "apiVersion": "2020-01-13-preview",
+                "name": "[concat(parameters('aName'), '/', parameters('guids')[0])]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Automation/automationAccounts', parameters('aName'))]",
+                    "[resourceId('Microsoft.Automation/automationAccounts/runbooks', parameters('aName') ,'OnOff')]",
+                    "[resourceId('Microsoft.Automation/automationAccounts/schedules', parameters('aName'), 'schedule02')]"
+                ],
+                "properties": {
+                    "runbook": {
+                        "name": "OnOff"
+                    },
+                    "schedule": {
+                        "name": "schedule02"
+                    }
+                }
+            },
+            {
+                "type": "Microsoft.Automation/automationAccounts/jobSchedules",
+                "apiVersion": "2020-01-13-preview",
+                "name": "[concat(parameters('aName'), '/', parameters('guids')[1])]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Automation/automationAccounts', parameters('aName'))]",
+                    "[resourceId('Microsoft.Automation/automationAccounts/runbooks', parameters('aName') ,'OnOff')]",
+                    "[resourceId('Microsoft.Automation/automationAccounts/schedules', parameters('aName'), 'schedule02')]"
+                ],
+                "properties": {
+                    "runbook": {
+                        "name": "OnOff"
+                    },
+                    "schedule": {
+                        "name": "schedule01"
+                    }
+                }
+            }
+        ]
+      },
+      {
+        "type": "Microsoft.OperationalInsights/workspaces/linkedServices",
+        "apiVersion": "2020-08-01",
+        "name": "[concat(parameters('workspaceName'), '/' , 'Automation')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[parameters('workspaceName')]",
+          "[parameters('aName')]"
+        ],
+        "properties": {
+          "resourceId": "[resourceId('Microsoft.Automation/automationAccounts', parameters('aName'))]"
+        }
+      }
+    ]
+  }
