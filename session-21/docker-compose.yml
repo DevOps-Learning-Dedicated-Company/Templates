@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+    sql2019:
+      image: "mcr.microsoft.com/mssql/server:2019-CU18-ubuntu-20.04"
+      restart: unless-stopped
+      environment:
+          ACCEPT_EULA: "Y"
+          SA_PASSWORD: "Qwerty12!"
+      healthcheck:
+          test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-Usa", "-PQwerty12!", "-Q", "select 1"]
+          interval: 3s
+          retries: 20
+
+    api:
+      build:
+          context: ./Booking.Server
+          dockerfile: Dockerfile
+      restart: unless-stopped
+      ports:
+          - "8080:80"
+      environment:
+          SqlDatabase: "Data Source=sql2019;Initial Catalog=Booking-DB;Integrated Security=False;User Id=sa;Password=Qwerty12!;MultipleActiveResultSets=True;"
+      depends_on:
+          sql2019:
+              condition: service_healthy
