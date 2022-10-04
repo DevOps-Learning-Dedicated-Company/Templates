@@ -1,0 +1,76 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "serviceName": {
+            "type": "string"
+        },
+        "appName": {
+            "type": "string"
+        },
+        "region": {
+            "type": "string"
+        },
+        "pricingTier": {
+            "type": "string"
+        },
+        "nodes": {
+            "type": "string"
+        },
+        "dockerImage": {
+            "type": "string"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        {
+            "name": "[parameters('serviceName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-12-01",
+            "location": "[parameters('region')]",
+            "kind": "linux",
+            "sku": {
+                "name": "[parameters('pricingTier')]"
+            },
+            "tags": {
+                "displayName": "[parameters('serviceName')]"
+            },
+            "properties": {
+                "name": "[parameters('serviceName')]",
+                "numberOfWorkers": "[parameters('nodes')]",
+                "reserved": true
+            }
+        },
+        {
+            "name": "[parameters('appName')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-12-01",
+            "location": "[parameters('region')]",
+            "kind": "app,linux,container",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('serviceName'))]": "Resource",
+                "displayName": "[parameters('appName')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serviceName'))]"
+            ],
+            "properties": {
+                "name": "[parameters('appName')]",
+                "httpsOnly": false,
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serviceName'))]",
+                "siteConfig": {
+                    "numberOfWorkers": "[parameters('nodes')]",
+                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerImage'))]",
+                    "appSettings": [
+                        {
+                        "name": "SqlDatabase",
+                        "value": "Data Source=bookingapiserv.database.windows.net;Initial Catalog=bookingAPIdb;Integrated Security=False;User Id=adminusername;Password=Qwerty12!;MultipleActiveResultSets=True;"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
