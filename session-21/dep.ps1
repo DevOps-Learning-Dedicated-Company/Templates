@@ -24,3 +24,24 @@ New-AzResourceGroupDeployment `
     -dockerImage 'parteg132/booking-api-actions:latest' `
     -Verbose
 
+New-AzResourceGroupDeployment `
+    -Name "appservie-for-nginx" `
+    -ResourceGroupName $RG `
+    -TemplateFile 'appServiceNginx.json' `
+    -serviceName 'nginxplan' `
+    -appName 'nginx2137' `
+    -region 'ukwest' `
+    -pricingTier 'S1' `
+    -nodes '1' `
+    -dockerImage 'nginx:latest' `
+    -Verbose
+
+New-AzResourceGroupDeployment `
+    -Name "file-share-for-nginx" `
+    -ResourceGroupName $RG `
+    -TemplateFile 'fileShare.json' `
+    -storageName 'nginxstorage01' `
+    -shName 'nginxshare' `
+    -region 'ukwest' `
+    -skuName 'Standard_LRS' `
+    -Verbose

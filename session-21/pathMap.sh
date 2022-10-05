@@ -1,0 +1,1 @@
+az webapp config storage-account add --resource-group "testing" --name "nginx2137" --custom-id "defaultWebsite" --storage-type "AzureFiles" --share-name "nginxshare" --account-name "nginxstorage01" --access-key "kPdseqNYQSTxQiwXXe1HIIlSw1lVLloYWNoA6EKdmWOzAeOLwqTYG+zcqcx8JlO/RnPf6+i/y5zd+AStX6lZrA==" --mount-path "/usr/share/nginx/html"
