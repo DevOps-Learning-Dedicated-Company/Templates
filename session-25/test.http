@@ -1,0 +1,13 @@
+@HOSTNAME = 20.121.105.25
+
+@PORT = 80
+
+@HOST = {{HOSTNAME}}:{{PORT}}
+
+
+###
+GET http://{{HOST}}/api/car/all
+
+###
+
+GET http://{{HOST}}/health/ping
